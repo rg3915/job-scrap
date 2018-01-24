@@ -12,18 +12,6 @@ def get_last_page(url):
     '''
     Retorna a última página
     :param url: link da página
-    :return str: a
-    '''
-    vagas = get(url)
-    vagas_page = bs(vagas.text, 'html.parser')
-    links = vagas_page.find('ul').find_all('a')
-    return max([link.get('href') for link in links])
-
-
-def get_last_page(url):
-    '''
-    Retorna a última página
-    :param url: link da página
     :return int: Número da última página
     '''
     vagas = get(url)
