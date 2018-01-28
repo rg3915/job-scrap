@@ -2,11 +2,11 @@ from collections import namedtuple
 from pprint import pprint
 from bs4 import BeautifulSoup as bs
 from requests import get
+import json
 
 '''
 www.infojobs.com.br/
 '''
-
 
 def get_last_page(url):
     '''
@@ -21,7 +21,6 @@ def get_last_page(url):
     links = links[-1]
     return int(links)
 
-
 def remove_escape(s):
     '''
     Remove \n \t \r
@@ -30,32 +29,47 @@ def remove_escape(s):
     '''
     return ' '.join(s.split())
 
-
 def get_jobs(url):
     '''
     Retorna um iterável com as vagas da página.
     :param url: link da página
     :return namedtuple: 'Vaga'
     '''
+    lista = []
     vagas = get(url)
     vagas_page = bs(vagas.text, 'html.parser')
-    boxes = vagas_page.find_all('div', {'id': 'ctl00_phMasterPage_cGrid_divGrid'})
-    for box in boxes:
-        titulo = box.find('div', {'class': 'vaga '}).text
-        empresa = box.find('div', {'class': 'vaga-company'}).text
-        publicado = box.find('span', {'class': 'data'}).text
-        #salario = box.find('span', {'class': 'valor-salario'}).text
-        #descricao = box.find('p', {'class': 'resumo-vaga'}).text
-        yield vaga(
-            remove_escape(titulo),
-            remove_escape(empresa),
-            remove_escape(publicado),
-            #remove_escape(salario),
-            #remove_escape(descricao)
-        )
+    boxes = vagas_page.find(id="ctl00_phMasterPage_cGrid_divGrid")
 
+    nome_vagas = boxes.find_all(class_="vaga ")
+    nome_empresas = boxes.find_all(class_="vaga-company")
+    data = boxes.find_all(class_="data")
+    
+    prvagas = []
+    prempresas = []
+    prdias = []
 
-vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
+    for vagas in nome_vagas:
+        vagas2 = vagas.get_text().strip()
+        prvagas.append(vagas2)
+
+    for empresas in nome_empresas:
+        empresas2 = empresas.get_text().strip()
+        prempresas.append(empresas2)
+
+    for dia in data:
+        dias = dia.get_text().strip()
+        prdias.append(dias)
+
+    for i in zip(prvagas, prempresas, prdias):
+        dt = {}
+        dt['vaga'] = i[0]
+        dt['empresa'] = i[1]
+        dt['data'] = i[2]
+        lista.append(dt)
+        
+    return(lista)
+    
+#vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 base_url = 'https://www.infojobs.com.br/'
 job = 'motorista'
 jobs = '{}vagas-de-emprego-{}.aspx?'.format(base_url, job)
@@ -66,3 +80,7 @@ urls = ['{}{}'.format(job_pages, n) for n in range(1, last_page + 1)]
 
 for url in urls:
     print(list(get_jobs(url)))
+'''
+with io.open('vagas.json', 'w') as f:
+    json.dump(get_jobs, f, indent=4,)
+'''
