@@ -1,12 +1,13 @@
+import json
+from bs4 import BeautifulSoup as bs
 from collections import namedtuple
 from pprint import pprint
-from bs4 import BeautifulSoup as bs
 from requests import get
-import json
 
 '''
 www.infojobs.com.br/
 '''
+
 
 def get_last_page(url):
     '''
@@ -21,6 +22,7 @@ def get_last_page(url):
     links = links[-1]
     return int(links)
 
+
 def remove_escape(s):
     '''
     Remove \n \t \r
@@ -28,6 +30,7 @@ def remove_escape(s):
     :return str: texto limpo
     '''
     return ' '.join(s.split())
+
 
 def get_jobs(url):
     '''
@@ -47,8 +50,9 @@ def get_jobs(url):
             remove_escape(empresa),
             remove_escape(publicado),
         )
-    
-vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
+
+vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')._asdict()
+# vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 base_url = 'https://www.infojobs.com.br/'
 job = 'motorista'
 jobs = '{}vagas-de-emprego-{}.aspx?'.format(base_url, job)
@@ -59,7 +63,8 @@ urls = ['{}{}'.format(job_pages, n) for n in range(1, last_page + 1)]
 
 for url in urls:
     print(list(get_jobs(url)))
-'''
-with io.open('vagas.json', 'w') as f:
-    json.dump(get_jobs, f, indent=4,)
-'''
+
+
+with open('vagas.json', 'w') as f:
+    for url in urls:
+        json.dump(list(get_jobs(url)), f, indent=4,)
