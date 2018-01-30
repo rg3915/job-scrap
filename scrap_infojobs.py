@@ -35,41 +35,20 @@ def get_jobs(url):
     :param url: link da página
     :return namedtuple: 'Vaga'
     '''
-    lista = []
     vagas = get(url)
     vagas_page = bs(vagas.text, 'html.parser')
-    boxes = vagas_page.find(id="ctl00_phMasterPage_cGrid_divGrid")
-
-    nome_vagas = boxes.find_all(class_="vaga ")
-    nome_empresas = boxes.find_all(class_="vaga-company")
-    data = boxes.find_all(class_="data")
+    boxes = vagas_page.find_all('div', {'class': 'element-vaga'})
+    for box in boxes:
+        titulo = box.find('div', {'class': 'vaga '}).text
+        empresa = box.find('div', {'class': 'vaga-company'}).text
+        publicado = box.find('span', {'class': 'data'}).text
+        yield vaga(
+            remove_escape(titulo),
+            remove_escape(empresa),
+            remove_escape(publicado),
+        )
     
-    prvagas = []
-    prempresas = []
-    prdias = []
-
-    for vagas in nome_vagas:
-        vagas2 = vagas.get_text().strip()
-        prvagas.append(vagas2)
-
-    for empresas in nome_empresas:
-        empresas2 = empresas.get_text().strip()
-        prempresas.append(empresas2)
-
-    for dia in data:
-        dias = dia.get_text().strip()
-        prdias.append(dias)
-
-    for i in zip(prvagas, prempresas, prdias):
-        dt = {}
-        dt['vaga'] = i[0]
-        dt['empresa'] = i[1]
-        dt['data'] = i[2]
-        lista.append(dt)
-        
-    return(lista)
-    
-#vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
+vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 base_url = 'https://www.infojobs.com.br/'
 job = 'motorista'
 jobs = '{}vagas-de-emprego-{}.aspx?'.format(base_url, job)
