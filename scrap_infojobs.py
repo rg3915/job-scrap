@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup as bs
 from collections import namedtuple
 from pprint import pprint
 from requests import get
-
+import ipdb
 '''
 www.infojobs.com.br/
 '''
@@ -41,6 +41,8 @@ def get_jobs(url):
     vagas = get(url)
     vagas_page = bs(vagas.text, 'html.parser')
     boxes = vagas_page.find_all('div', {'class': 'element-vaga'})
+    for a in vagas_page.find_all('a',{'class':'vagaTitle'}, href=True):
+        print (a['href'])
     for box in boxes:
         titulo = box.find('div', {'class': 'vaga '}).text
         empresa = box.find('div', {'class': 'vaga-company'}).text
@@ -51,7 +53,7 @@ def get_jobs(url):
             remove_escape(publicado),
         )
 
-vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')._asdict()
+vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 # vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 base_url = 'https://www.infojobs.com.br/'
 job = 'motorista'
