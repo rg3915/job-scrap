@@ -30,7 +30,7 @@ def remove_escape(s):
     :return str: texto limpo
     '''
     return ' '.join(s.split())
-
+    
 
 def get_jobs(url):
     '''
@@ -41,8 +41,15 @@ def get_jobs(url):
     vagas = get(url)
     vagas_page = bs(vagas.text, 'html.parser')
     boxes = vagas_page.find_all('div', {'class': 'element-vaga'})
+    salario = []
     for a in vagas_page.find_all('a',{'class':'vagaTitle'}, href=True):
-        print (a['href'])
+        link = (a['href'])
+        vagas2 = get(link)
+        vagas_page2 = bs(vagas2.content, 'html.parser')
+        salario1 = vagas_page2.find('span', {'id': 'ctl00_phMasterPage_cVacancySummary_litSalary'})
+        salario2 = salario1.get_text()
+        salario.append(salario2)
+    salariu = ''.join(salario)
     for box in boxes:
         titulo = box.find('div', {'class': 'vaga '}).text
         empresa = box.find('div', {'class': 'vaga-company'}).text
@@ -51,9 +58,10 @@ def get_jobs(url):
             remove_escape(titulo),
             remove_escape(empresa),
             remove_escape(publicado),
+            remove_escape(salariu)
         )
 
-vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
+vaga = namedtuple('Vaga', 'Titulo Empresa Publicado Salario')
 # vaga = namedtuple('Vaga', 'Titulo Empresa Publicado')
 base_url = 'https://www.infojobs.com.br/'
 job = 'motorista'
